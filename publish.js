@@ -387,6 +387,7 @@ function linktoExternal(longName, name) {
   return linkto(longName, name.replace(/(^"|"$)/g, ''))
 }
 
+let counter = 0;
 function buildGroupNav (members, title) {
   var globalNav
   var seenTutorials = {}
@@ -394,15 +395,25 @@ function buildGroupNav (members, title) {
   var seen = {}
   nav += '<div class="category">'
   if (title) {
-    nav += '<h2>' + title + '</h2>'
+    if(counter == 0){
+      nav += '<h2 style="margin-top:16px!important;">' + title + '</h2>'
+    }else{
+      nav += '<h2>' + title + '</h2>'
+    }
   }
+  counter++;
+
+  if(members.externals){
+    nav += '<h2>' + "Externals" + '</h2>'
+  }
+
   nav += buildMemberNav(members.tutorials || [], 'Tutorials', seenTutorials, linktoTutorial)
   nav += buildMemberNav(members.modules || [], 'Modules', {}, linkto)
-  nav += buildMemberNav(members.externals || [], 'Externals', seen, linktoExternal)
+  nav += buildMemberNav(members.externals || [], 'Modules', seen, linktoExternal)
   nav += buildMemberNav(members.namespaces || [], 'Namespaces', seen, linkto)
   nav += buildMemberNav(members.classes || [], 'Classes', seen, linkto)
   nav += buildMemberNav(members.interfaces || [], 'Interfaces', seen, linkto)
-  nav += buildMemberNav(members.events || [], 'Events', seen, linkto)
+  // nav += buildMemberNav(members.events || [], 'Events', seen, linkto)
   nav += buildMemberNav(members.mixins || [], 'Mixins', seen, linkto)
   nav += buildMemberNav(members.components || [], 'Components', seen, linkto)
     
@@ -445,12 +456,12 @@ function buildGroupNav (members, title) {
  */
 function buildNav(members, navTypes = null, betterDocs) {
   const href = betterDocs.landing ? 'docs.html' : 'index.html'
-  var nav = navTypes ? '' : `<h2><a href="${href}">Documentation</a></h2>`
+  var nav = navTypes ? '' :  `<h3><a style="font-size:15px" href="${href}">Documentation</a></h3>`
 
   var categorised = {}
   var rootScope = {}
 
-  var types = navTypes || ['modules', 'externals', 'namespaces', 'classes',
+  var types = navTypes || ['modules',  'namespaces', 'classes','externals',
     'components', 'interfaces', 'events', 'mixins', 'globals']
   types.forEach(function(type) {
     if (!members[type]) { return }
@@ -468,11 +479,10 @@ function buildNav(members, navTypes = null, betterDocs) {
     })
   })
     
-  nav += buildGroupNav(rootScope)
   Object.keys(categorised).sort().forEach(function (category) {
     nav += buildGroupNav(categorised[category], category)
   })
-
+  nav += buildGroupNav(rootScope)
   return nav
 }
 
@@ -727,7 +737,7 @@ exports.publish = function(taffyData, opts, tutorials) {
   files = find({kind: 'file'})
   packages = find({kind: 'package'})
 
-  generate('Home', '',
+  generate('', '',
     packages.concat(
       [{
         kind: 'mainpage',
